@@ -2,7 +2,10 @@ from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import requests, os
 
-app = Flask(__name__, static_folder='static')
+BASE_DIR = os.path.dirname(os.path.abspath(file))
+STATIC   = os.path.join(BASE_DIR, "static")
+
+app = Flask(name, static_folder=STATIC)
 CORS(app)
 
 BASE  = "https://paper-api.alpaca.markets"
@@ -18,7 +21,11 @@ def hdrs(req):
 
 @app.route("/")
 def index():
-    return send_from_directory("static", "index.html")
+    return send_from_directory(STATIC, "index.html")
+
+@app.route("/<path:path>")
+def static_files(path):
+    return send_from_directory(STATIC, path)
 
 @app.route("/api/account")
 def account():
@@ -70,6 +77,6 @@ def latest(sym):
     r = requests.get(f"{DATA}/v2/stocks/{sym}/quotes/latest", headers=hdrs(request))
     return jsonify(r.json()), r.status_code
 
-if __name__ == "__main__":
+if name == "main":
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
